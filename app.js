@@ -6,7 +6,9 @@ const app = express();
 
 const port = process.env.PORT;
 
-const arcadiaRouter = require('./routers/arcadiaRouter')
+const productsRouter = require('./routers/productsRouter')
+
+const categoriesRouter = require('./routers/categoriesRouter')
 
 app.use(cors({ origin: process.env.FE_APP }))
 
@@ -22,7 +24,9 @@ app.get('/', (req, res) => {
 
 app.use(express.json())
 
-app.use('/products', arcadiaRouter)
+app.use('/products', productsRouter)
+
+app.use('/categories', categoriesRouter)
 
 //use errorHandler
 

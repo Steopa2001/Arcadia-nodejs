@@ -4,6 +4,6 @@ const router = express.Router()
 
 const arcadiaController = require('../controllers/arcadiaController')
 
-router.get('/', arcadiaController.index)
+router.get('/', arcadiaController.indexCategories)
 
 module.exports = router
