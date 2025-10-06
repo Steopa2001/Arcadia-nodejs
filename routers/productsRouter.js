@@ -4,12 +4,23 @@ const router = express.Router()
 
 const arcadiaController = require('../controllers/arcadiaController')
 
-router.get('/', arcadiaController.indexProducts)
+// Tutti i prodotti
+router.get('/', arcadiaController.indexProducts);
+
+// Prodotto singolo per slug (prima dello ID)
+router.get('/slug/:slug', arcadiaController.showProductBySlug);
+
+// Prodotto singolo per ID
 router.get('/:id', arcadiaController.showProducts);
-// Rotta per filtrare per categoria
+
+// Prodotti per categoria
 router.get('/category/:id', arcadiaController.indexProductsByCategory);
-router.post("/", arcadiaController.createProduct);
-router.delete("/:id", arcadiaController.deleteProduct);
+
+// Creazione prodotto
+router.post('/', arcadiaController.createProduct);
+
+// Delete prodotto
+router.delete('/:id', arcadiaController.deleteProduct);
 
 
 module.exports = router;

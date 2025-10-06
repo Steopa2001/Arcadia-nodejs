@@ -25,7 +25,21 @@ const indexProductsByCategory = (req, res) => {
   });
 };
 
+// -------------- PRODUCTS BY SLUG --------------
+const showProductBySlug = (req, res) => {
+  const { slug } = req.params;
+  const sql = "SELECT * FROM products WHERE slug = ?";
 
+  connection.query(sql, [slug], (err, result) => {
+    if (err) return res.status(500).json({ error: "Errore nella query: " + err });
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({ error: "Prodotto non trovato" });
+    }
+
+    res.json(result[0]);
+  });
+};
 
 
 // ............... PRODUCTS SHOW......................
@@ -148,5 +162,6 @@ module.exports = {
   createProduct, 
   deleteProduct,
   indexCategories,
-  indexProductsByCategory
+  indexProductsByCategory,
+  showProductBySlug
 };
