@@ -19,6 +19,12 @@ router.get('/category/:id', arcadiaController.indexProductsByCategory);
 // Creazione prodotto
 router.post('/', arcadiaController.createProduct);
 
+// Modifica totale del prodotto
+router.put('/:id', arcadiaController.updateProduct);
+
+// Modifica parziale del prodotto
+router.patch('/:id', arcadiaController.modifyProduct);
+
 // Delete prodotto
 router.delete('/:id', arcadiaController.deleteProduct);
 

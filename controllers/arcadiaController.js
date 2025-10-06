@@ -129,6 +129,93 @@ const createProduct = (req, res) => {
   );
 };
 
+// ----------------------- UPDATE PRODUCT----------------------------------------
+
+const updateProduct = (req, res) => {
+  const { id } = req.params;
+  const {
+    name,
+    slug,
+    price,
+    description,
+    discount,
+    player_number,
+    complexity,
+    language,
+    duration,
+    recommended_age,
+    genre,
+    image,
+    category_id,
+  } = req.body;
+
+  if (
+    !name || !slug || !price || !description || discount === undefined ||
+    !player_number || !complexity || !language || !duration ||
+    !recommended_age || !genre || image === undefined || !category_id
+  ) {
+    return res.status(400).json({
+      error: "Tutti i campi sono obbligatori"
+    });
+  }
+
+  const sql = `
+    UPDATE products
+    SET name = ?, slug = ?, price = ?, description = ?, discount = ?, 
+        player_number = ?, complexity = ?, language = ?, duration = ?, 
+        recommended_age = ?, genre = ?, image = ?, category_id = ?
+    WHERE id = ?
+  `;
+
+  const values = [
+    name, slug, price, description, discount, player_number, complexity,
+    language, duration, recommended_age, genre, image, category_id, id
+  ];
+
+  connection.query(sql, values, (err, result) => {
+    if (err)
+      return res.status(500).json({ error: "Errore UPDATE: " + err });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Prodotto non trovato" });
+    }
+
+    res.json({ message: "Prodotto aggiornato con successo" });
+  });
+};
+
+// ----------------------- MODIFY PRODUCT----------------------------------------
+
+const modifyProduct = (req, res) => {
+  const { id } = req.params;
+  const productData = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: "ID mancante" });
+  }
+
+  if (!productData) {
+    return res.status(400).json({ error: "Nessun dato da aggiornare" });
+  }
+
+  const sql = "UPDATE products SET ? WHERE id = ?";
+
+  connection.query(sql, [productData, id], (err, result) => {
+    if (err) {
+      console.error("Errore nella query PATCH:", err);
+      return res.status(500).json({ error: "Errore UPDATE parziale: " + err });
+    }
+
+    // per capire quante righe sono state toccate dalla query
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Prodotto non trovato" });
+    }
+
+    res.json({ message: "Prodotto modificato con successo" });
+  });
+};
+
+
 // ----------------------- DELETE PRODUCT----------------------------------------
 
 const deleteProduct = (req, res) => {
@@ -159,7 +246,9 @@ const indexCategories = (req, res) => {
 module.exports = {
   indexProducts,
   showProducts,
-  createProduct, 
+  createProduct,
+  updateProduct,
+  modifyProduct,
   deleteProduct,
   indexCategories,
   indexProductsByCategory,
