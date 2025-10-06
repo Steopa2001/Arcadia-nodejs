@@ -8,13 +8,13 @@ const port = process.env.PORT;
 
 const productsRouter = require('./routers/productsRouter')
 
-const categoriesRouter = require('./routers/categoriesRouter')
+const categoriesRouter = require('./routers/categoriesRouter');
 
 app.use(cors({ origin: process.env.FE_APP }))
 
-//import errorHandler
+const errorsHandler = require('./middlewares/ErrorsHandler');
 
-//import notFound
+const notFound = require('./middlewares/NotFound')
 
 app.use(express.static('public'))
 
@@ -28,9 +28,9 @@ app.use('/products', productsRouter)
 
 app.use('/categories', categoriesRouter)
 
-//use errorHandler
+app.use(errorsHandler)
 
-//use notFound
+app.use(notFound)
 
 app.listen(port, () => {
   console.log(`Server in ascolto alla porta ${port}`)
