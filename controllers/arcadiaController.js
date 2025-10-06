@@ -13,6 +13,21 @@ const indexProducts = (req, res) => {
   });
 };
 
+// -------------- PRODUCTS CATEGORIES -----------------
+const indexProductsByCategory = (req, res) => {
+  const { id } = req.params; // id della categoria
+  const sql = "SELECT * FROM products WHERE category_id = ?";
+
+  connection.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json({ error: "Errore query: " + err });
+
+    res.json(result); // array di prodotti
+  });
+};
+
+
+
+
 // ............... PRODUCTS SHOW......................
 const showProducts = (req, res) => {
   const { id } = req.params;
@@ -133,4 +148,5 @@ module.exports = {
   createProduct, 
   deleteProduct,
   indexCategories,
+  indexProductsByCategory
 };
