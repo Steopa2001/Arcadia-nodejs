@@ -12,6 +12,8 @@ const categoriesRouter = require('./routers/categoriesRouter');
 
 const cartRouter = require('./routers/cartRouter')
 
+const ordersRouter = require("./routers/ordersRouter");
+
 app.use(cors({ origin: process.env.FE_APP }))
 
 const errorsHandler = require('./middlewares/ErrorsHandler');
@@ -31,6 +33,8 @@ app.use('/products', productsRouter)
 app.use('/categories', categoriesRouter)
 
 app.use('/cart', cartRouter)
+
+app.use('/orders', ordersRouter)
 
 app.use(errorsHandler)
 
