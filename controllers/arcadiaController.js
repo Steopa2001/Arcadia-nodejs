@@ -234,13 +234,40 @@ const deleteProduct = (req, res) => {
   });
 };
 
-// --------------------CATEGORIES INDEX------------------------------------------
+// ----------------------- CATEGORIES INDEX ----------------------------------------
 const indexCategories = (req, res) => {
   const sql = "SELECT * FROM categories";
   connection.query(sql, (err, result) => {
     if (err) return res.status(500).json({ error: "Errore query: " + err });
     res.json(result);
   });
+};
+
+// ----------------------- CART ----------------------------------------
+let cart = [];
+
+// ----------------------- INDEX CART ----------------------------------------
+const indexCart = (req, res) => {
+  res.json(cart);
+};
+
+// ----------------------- ADD PRODUCT CART ----------------------------------------
+const addToCart = (req, res) => {
+  const product = req.body;
+
+  if (!product.id) {
+    return res.status(400).json({ error: "Serve un id prodotto" });
+  }
+
+  cart.push(product);
+  res.status(201).json({ message: "Prodotto aggiunto al carrello", cart });
+};
+
+// ----------------------- DELETE PRODUCT CART ----------------------------------------
+const removeFromCart = (req, res) => {
+  const { id } = req.params;
+  cart = cart.filter(product => product.id != id);
+  res.json({ message: `Prodotto ${id} rimosso dal carrello`, cart });
 };
 
 module.exports = {
@@ -252,5 +279,8 @@ module.exports = {
   deleteProduct,
   indexCategories,
   indexProductsByCategory,
-  showProductBySlug
+  showProductBySlug,
+  indexCart,
+  addToCart,
+  removeFromCart
 };
