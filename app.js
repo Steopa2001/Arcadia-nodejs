@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
 // rotte principali
 app.use("/products", productsRouter);
 app.use("/categories", categoriesRouter);
-app.use("/cart", cartRouter); // 👈 il PATCH è già gestito dentro cartRouter.js
+app.use("/cart", cartRouter);
 app.use("/orders", ordersRouter);
 
 // middleware di errore
