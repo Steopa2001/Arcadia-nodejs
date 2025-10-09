@@ -1,5 +1,6 @@
 const connection = require("../data/db");
 
+// ----------------------- PRODUCTS INDEX ----------------------------------------
 const indexProducts = (req, res) => {
   const sql = "SELECT * FROM products";
 
@@ -13,7 +14,7 @@ const indexProducts = (req, res) => {
   });
 };
 
-// -------------- PRODUCTS CATEGORIES -----------------
+// ----------------------- PRODUCTS BY CATEGORY ----------------------------------------
 const indexProductsByCategory = (req, res) => {
   const { id } = req.params; // id della categoria
   const sql = "SELECT * FROM products WHERE category_id = ?";
@@ -25,13 +26,14 @@ const indexProductsByCategory = (req, res) => {
   });
 };
 
-// -------------- PRODUCTS BY SLUG --------------
+// ----------------------- PRODUCT BY SLUG ----------------------------------------
 const showProductBySlug = (req, res) => {
   const { slug } = req.params;
   const sql = "SELECT * FROM products WHERE slug = ?";
 
   connection.query(sql, [slug], (err, result) => {
-    if (err) return res.status(500).json({ error: "Errore nella query: " + err });
+    if (err)
+      return res.status(500).json({ error: "Errore nella query: " + err });
 
     if (!result || result.length === 0) {
       return res.status(404).json({ error: "Prodotto non trovato" });
@@ -41,8 +43,7 @@ const showProductBySlug = (req, res) => {
   });
 };
 
-
-// ............... PRODUCTS SHOW......................
+// ----------------------- PRODUCT BY ID ----------------------------------------
 const showProducts = (req, res) => {
   const { id } = req.params;
   const sql = "SELECT * FROM products WHERE id = ?";
@@ -62,9 +63,7 @@ const showProducts = (req, res) => {
   });
 };
 
-//  ----------------------PRODUCTS POST-------------------------------------
-
-// POST /products
+// ----------------------- CREATE PRODUCT ----------------------------------------
 const createProduct = (req, res) => {
   const {
     name,
@@ -129,8 +128,7 @@ const createProduct = (req, res) => {
   );
 };
 
-// ----------------------- UPDATE PRODUCT----------------------------------------
-
+// ----------------------- UPDATE PRODUCT (FULL) ----------------------------------------
 const updateProduct = (req, res) => {
   const { id } = req.params;
   const {
@@ -150,12 +148,22 @@ const updateProduct = (req, res) => {
   } = req.body;
 
   if (
-    !name || !slug || !price || !description || discount === undefined ||
-    !player_number || !complexity || !language || !duration ||
-    !recommended_age || !genre || image === undefined || !category_id
+    !name ||
+    !slug ||
+    !price ||
+    !description ||
+    discount === undefined ||
+    !player_number ||
+    !complexity ||
+    !language ||
+    !duration ||
+    !recommended_age ||
+    !genre ||
+    image === undefined ||
+    !category_id
   ) {
     return res.status(400).json({
-      error: "Tutti i campi sono obbligatori"
+      error: "Tutti i campi sono obbligatori",
     });
   }
 
@@ -168,13 +176,24 @@ const updateProduct = (req, res) => {
   `;
 
   const values = [
-    name, slug, price, description, discount, player_number, complexity,
-    language, duration, recommended_age, genre, image, category_id, id
+    name,
+    slug,
+    price,
+    description,
+    discount,
+    player_number,
+    complexity,
+    language,
+    duration,
+    recommended_age,
+    genre,
+    image,
+    category_id,
+    id,
   ];
 
   connection.query(sql, values, (err, result) => {
-    if (err)
-      return res.status(500).json({ error: "Errore UPDATE: " + err });
+    if (err) return res.status(500).json({ error: "Errore UPDATE: " + err });
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Prodotto non trovato" });
@@ -184,8 +203,7 @@ const updateProduct = (req, res) => {
   });
 };
 
-// ----------------------- MODIFY PRODUCT----------------------------------------
-
+// ----------------------- MODIFY PRODUCT (PARTIAL) ----------------------------------------
 const modifyProduct = (req, res) => {
   const { id } = req.params;
   const productData = req.body;
@@ -206,7 +224,6 @@ const modifyProduct = (req, res) => {
       return res.status(500).json({ error: "Errore UPDATE parziale: " + err });
     }
 
-    // per capire quante righe sono state toccate dalla query
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Prodotto non trovato" });
     }
@@ -215,20 +232,15 @@ const modifyProduct = (req, res) => {
   });
 };
 
-
-// ----------------------- DELETE PRODUCT----------------------------------------
-
+// ----------------------- DELETE PRODUCT ----------------------------------------
 const deleteProduct = (req, res) => {
   const { id } = req.params;
   const sql = "DELETE FROM products WHERE id = ?";
 
   connection.query(sql, [id], (err, result) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ error: "Errore DELETE: " + err });
+      return res.status(500).json({ error: "Errore DELETE: " + err });
     }
-
 
     res.json({ message: `Product ${id} eliminato con successo` });
   });
@@ -243,7 +255,7 @@ const indexCategories = (req, res) => {
   });
 };
 
-// ----------------------- CART ----------------------------------------
+// ----------------------- CART (mocked in memory) ----------------------------------------
 let cart = [];
 
 // ----------------------- INDEX CART ----------------------------------------
@@ -251,7 +263,7 @@ const indexCart = (req, res) => {
   res.json(cart);
 };
 
-// ----------------------- ADD PRODUCT CART ----------------------------------------
+// ----------------------- ADD PRODUCT TO CART ----------------------------------------
 const addToCart = (req, res) => {
   const product = req.body;
 
@@ -259,17 +271,45 @@ const addToCart = (req, res) => {
     return res.status(400).json({ error: "Serve un id prodotto" });
   }
 
-  cart.push(product);
+  // Se il prodotto è già nel carrello, aumenta la quantità
+  const existing = cart.find((p) => p.id == product.id);
+  if (existing) {
+    existing.quantity = (existing.quantity || 1) + 1;
+  } else {
+    product.quantity = product.quantity || 1;
+    cart.push(product);
+  }
+
   res.status(201).json({ message: "Prodotto aggiunto al carrello", cart });
 };
 
-// ----------------------- DELETE PRODUCT CART ----------------------------------------
+// ----------------------- UPDATE QUANTITY IN CART (PATCH) ----------------------------------------
+const updateCartQuantity = (req, res) => {
+  const { id } = req.params;
+  const { quantity } = req.body;
+
+  const product = cart.find((p) => p.id == id);
+
+  if (!product) {
+    return res.status(404).json({ error: "Prodotto non trovato nel carrello" });
+  }
+
+  product.quantity = quantity;
+
+  res.json({
+    message: `Quantità aggiornata per il prodotto ${id}`,
+    cart,
+  });
+};
+
+// ----------------------- DELETE PRODUCT FROM CART ----------------------------------------
 const removeFromCart = (req, res) => {
   const { id } = req.params;
-  cart = cart.filter(product => product.id != id);
+  cart = cart.filter((product) => product.id != id);
   res.json({ message: `Prodotto ${id} rimosso dal carrello`, cart });
 };
 
+// ----------------------- EXPORT ----------------------------------------
 module.exports = {
   indexProducts,
   showProducts,
@@ -282,5 +322,6 @@ module.exports = {
   showProductBySlug,
   indexCart,
   addToCart,
-  removeFromCart
+  removeFromCart,
+  updateCartQuantity,
 };

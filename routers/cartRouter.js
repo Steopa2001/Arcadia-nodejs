@@ -1,13 +1,16 @@
-const express = require('express')
+const express = require("express");
 
-const router = express.Router()
+const router = express.Router();
 
-const arcadiaController = require('../controllers/arcadiaController')
+const arcadiaController = require("../controllers/arcadiaController");
 
-router.get('/', arcadiaController.indexCart)
+router.get("/", arcadiaController.indexCart);
 
-router.post('/', arcadiaController.addToCart)
+router.post("/", arcadiaController.addToCart);
 
-router.delete('/:id', arcadiaController.removeFromCart)
+// aggiorna la quantità di un prodotto nel carrello
+router.patch("/:id", arcadiaController.updateCartQuantity);
 
-module.exports = router
+router.delete("/:id", arcadiaController.removeFromCart);
+
+module.exports = router;

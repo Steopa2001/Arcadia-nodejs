@@ -1,45 +1,36 @@
-const express = require('express');
-
-const cors = require('cors')
+const express = require("express");
+const cors = require("cors");
 
 const app = express();
-
 const port = process.env.PORT;
 
-const productsRouter = require('./routers/productsRouter')
-
-const categoriesRouter = require('./routers/categoriesRouter');
-
-const cartRouter = require('./routers/cartRouter')
-
+const productsRouter = require("./routers/productsRouter");
+const categoriesRouter = require("./routers/categoriesRouter");
+const cartRouter = require("./routers/cartRouter");
 const ordersRouter = require("./routers/ordersRouter");
 
-app.use(cors({ origin: process.env.FE_APP }))
+app.use(cors({ origin: process.env.FE_APP }));
 
-const errorsHandler = require('./middlewares/ErrorsHandler');
+const errorsHandler = require("./middlewares/ErrorsHandler");
+const notFound = require("./middlewares/NotFound");
 
-const notFound = require('./middlewares/NotFound')
+app.use(express.static("public"));
+app.use(express.json());
 
-app.use(express.static('public'))
+app.get("/", (req, res) => {
+  res.send("Rotta base");
+});
 
-app.get('/', (req, res) => {
-  res.send('Rotta base')
-})
+// rotte principali
+app.use("/products", productsRouter);
+app.use("/categories", categoriesRouter);
+app.use("/cart", cartRouter); // 👈 il PATCH è già gestito dentro cartRouter.js
+app.use("/orders", ordersRouter);
 
-app.use(express.json())
-
-app.use('/products', productsRouter)
-
-app.use('/categories', categoriesRouter)
-
-app.use('/cart', cartRouter)
-
-app.use('/orders', ordersRouter)
-
-app.use(errorsHandler)
-
-app.use(notFound)
+// middleware di errore
+app.use(errorsHandler);
+app.use(notFound);
 
 app.listen(port, () => {
-  console.log(`Server in ascolto alla porta ${port}`)
-})
+  console.log(`Server in ascolto alla porta ${port}`);
+});
