@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+// aggiunta per Nodemailer
+require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT;
