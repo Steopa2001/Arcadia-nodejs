@@ -1,5 +1,5 @@
 const connection = require("../data/db");
-
+const { sendOrderEmails } = require("../../Arcadia-backend/email")
 // funzione per salvare un ordine e i suoi prodotti
 const storeOrders = (req, res) => {
   // recupero dati della form
@@ -16,12 +16,12 @@ const storeOrders = (req, res) => {
     items,
   } = req.body;
 
-  // controlli 
+  // controlli
   if (!name || !surname || !email || !address || !cap || !city || !province) {
     return res.status(400).json({ error: "Campi obbligatori mancanti" });
   }
 
-  if (!Array.isArray(items) || items.length === 0) {
+  if (items.length === 0) {
     return res.status(400).json({ error: "Il carrello è vuoto" });
   }
 
@@ -54,7 +54,7 @@ const storeOrders = (req, res) => {
       // contatore per sapere quando tutte le query hanno finito
       let inserted = 0;
 
-      // ciclo su ogni prodotto 
+      // ciclo su ogni prodotto
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
 
@@ -73,12 +73,17 @@ const storeOrders = (req, res) => {
 
           // quando  le insert sono completate, invio risposta
           if (inserted === items.length) {
-            res.status(201).json({
-              id: orderId,
-              total,
-              items: items.length,
-              message: "Ordine e dettagli inseriti correttamente",
-            });
+            sendOrderEmails({ id: orderId, name, surname, email, total })
+              .catch((err) => console.error("Errore invio email:", err))
+              .finally(() => {
+                res.status(201).json({
+                  id: orderId,
+                  total,
+                  items: items.length,
+                  message:
+                    "Ordine e dettagli inseriti correttamente (email inviate)",
+                });
+              });
           }
         });
       }
