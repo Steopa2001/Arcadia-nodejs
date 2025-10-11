@@ -1,5 +1,5 @@
 const connection = require("../data/db");
-const { sendOrderEmails } = require("../../Arcadia-backend/email")
+const { sendOrderEmails } = require("../email")
 // funzione per salvare un ordine e i suoi prodotti
 const storeOrders = (req, res) => {
   // recupero dati della form
