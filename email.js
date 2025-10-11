@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   host: process.env.BREVO_HOST,
   port: Number(process.env.BREVO_PORT) || 587,
-  secure: false, 
+  secure: false,
   auth: {
     user: process.env.BREVO_USER,
     pass: process.env.BREVO_PASS,
@@ -16,7 +16,21 @@ async function sendOrderEmails({ id, name, surname, email, total }) {
     from: process.env.MAIL_FROM,
     to: email,
     subject: `Conferma ordine #${id}`,
-    html: `<p>Ciao <b>${name}</b>, ordine <b>#${id}</b> ricevuto. Totale: <b>€${total}</b>.</p>`,
+    html: `
+  <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+    <h2 style="color:#4B0082;">Grazie per il tuo ordine, ${name}!</h2>
+    <p>Abbiamo ricevuto il tuo ordine n. <strong>${id}</strong>.</p>
+    <p>Totale: <strong>€${total.toFixed(2)}</strong></p>
+
+    <hr style="border:none;border-top:1px solid #ddd;margin:20px 0;">
+
+    <p style="font-size: 14px; color:#555;">
+      Cordiali saluti,<br>
+      <strong>Arcadia</strong><br>
+      <a href="mailto:arcadiamagicgamess@gmail.com" style="color:#4B0082;">arcadiamagicgamess@gmail.com</a>
+    </p>
+  </div>
+`,
   };
 
   const venditore = {
@@ -28,7 +42,7 @@ async function sendOrderEmails({ id, name, surname, email, total }) {
 
   await transporter.sendMail(cliente);
   await transporter.sendMail(venditore);
-  console.log("Email inviate tramite Brevo.");
+  console.log("Email inviate.");
 }
 
 module.exports = { sendOrderEmails };
