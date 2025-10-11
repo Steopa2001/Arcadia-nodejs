@@ -15,52 +15,46 @@ const connection = require("../data/db");
 // };
 
 // ----------------------- PRODUCTS INDEX (ricerca e ordinamento) ----------------------------------------
+// ----------------------- PRODUCTS INDEX (ricerca, ordinamento, filtro per slug) -----------------------
 const indexProducts = (req, res) => {
-  // prendo i parametri dalla query
   const searchTerm = req.query.q ? req.query.q.toLowerCase() : "";
-  const categoryId = req.query.category_id;
-  let sortField = "name";   // di default ordino per nome
-  let sortOrder = "ASC";    // di default ordino crescente
+  const slug = req.query.slug;   // lo slug della categoria (es. giochi-da-tavolo)
 
-  if (req.query.sort === "price") {
-    sortField = "price";
-  }
-  if (req.query.order === "desc") {
-    sortOrder = "DESC";
-  }
+  let sortField = "name";
+  let sortOrder = "ASC";
+  if (req.query.sort === "price") sortField = "price";
+  if (req.query.order === "desc") sortOrder = "DESC";
 
-  // costruisco la query base
-  let sql = "SELECT * FROM products";
+  // query base
+  let sql = "SELECT p.* FROM products p";
   let values = [];
 
-  // se c'è la ricerca
+  // se c’è slug, join con categories
+  if (slug) {
+    sql += " JOIN categories c ON p.category_id = c.id WHERE c.slug = ?";
+    values.push(slug);
+  } else {
+    sql += " WHERE 1=1"; // trucco per concatenare filtri
+  }
+
+  // se c’è ricerca
   if (searchTerm) {
-    sql += " WHERE LOWER(name) LIKE ?";
+    sql += " AND LOWER(p.name) LIKE ?";
     values.push(`%${searchTerm}%`);
   }
 
-  // se c'è anche la categoria
-  if (categoryId) {
-    if (searchTerm) {
-      sql += " AND category_id = ?";
-    } else {
-      sql += " WHERE category_id = ?";
-    }
-    values.push(categoryId);
-  }
-
-  // aggiungo ordinamento
-  sql += " ORDER BY " + sortField + " " + sortOrder;
+  // ordinamento
+  sql += " ORDER BY p." + sortField + " " + sortOrder;
 
   // eseguo query
   connection.query(sql, values, (err, result) => {
     if (err) {
-      res.status(500).json("Errore nella query: " + err);
-    } else {
-      res.json(result);
+      return res.status(500).json({ error: "Errore query: " + err });
     }
+    res.json(result);
   });
 };
+
 
 
 // ----------------------- PRODUCTS BY CATEGORY ----------------------------------------
