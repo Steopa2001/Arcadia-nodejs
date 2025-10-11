@@ -316,8 +316,11 @@ const addToCart = (req, res) => {
   // Se il prodotto è già nel carrello, aumenta la quantità
   const existing = cart.find((p) => p.id == product.id);
   if (existing) {
-    existing.quantity = (existing.quantity || 1) + product.quantity;
-  } else {
+    if (existing.quantity + product.quantity <= 10) {
+      existing.quantity = (existing.quantity || 1) + product.quantity;
+    }
+  }
+  else {
     product.quantity = product.quantity || 1;
     cart.push(product);
   }
