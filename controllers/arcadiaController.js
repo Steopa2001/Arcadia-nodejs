@@ -17,7 +17,7 @@ const connection = require("../data/db");
 // ----------------------- PRODUCTS INDEX (ricerca, ordinamento, filtro per slug) -----------------------
 const indexProducts = (req, res) => {
   const searchTerm = req.query.q ? req.query.q.toLowerCase() : "";
-  const slug = req.query.slug;   // lo slug della categoria (es. giochi-da-tavolo)
+  const slug = req.query.slug; // lo slug della categoria (es. giochi-da-tavolo)
 
   let sortField = "name";
   let sortOrder = "ASC";
@@ -53,8 +53,6 @@ const indexProducts = (req, res) => {
     res.json(result);
   });
 };
-
-
 
 // ----------------------- PRODUCTS BY CATEGORY ----------------------------------------
 const indexProductsByCategory = (req, res) => {
@@ -351,6 +349,41 @@ const removeFromCart = (req, res) => {
   res.json({ message: `Prodotto ${id} rimosso dal carrello`, cart });
 };
 
+// ----------------------- WISHLIST (mocked in memory) ----------------------------------------
+let wishlist = [];
+
+// ----------------------- INDEX WISHLIST ----------------------------------------
+const indexWishlist = (req, res) => {
+  res.json(wishlist);
+};
+
+// ----------------------- ADD PRODUCT TO WISHLIST ----------------------------------------
+const addToWishlist = (req, res) => {
+  const product = req.body;
+
+  if (!product.id) {
+    return res.status(400).json({ error: "Serve un id prodotto" });
+  }
+
+  // Evita duplicati
+  const existing = wishlist.find((p) => p.id == product.id);
+  if (existing) {
+    return res.status(409).json({ message: "Prodotto già nella wishlist" });
+  }
+
+  wishlist.push(product);
+  res
+    .status(201)
+    .json({ message: "Prodotto aggiunto alla wishlist", wishlist });
+};
+
+// ----------------------- DELETE PRODUCT FROM WISHLIST ----------------------------------------
+const removeFromWishlist = (req, res) => {
+  const { id } = req.params;
+  wishlist = wishlist.filter((product) => product.id != id);
+  res.json({ message: `Prodotto ${id} rimosso dalla wishlist`, wishlist });
+};
+
 // ----------------------- EXPORT ----------------------------------------
 module.exports = {
   indexProducts,
@@ -366,4 +399,7 @@ module.exports = {
   addToCart,
   removeFromCart,
   updateCartQuantity,
+  indexWishlist,
+  addToWishlist,
+  removeFromWishlist,
 };

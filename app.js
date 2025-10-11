@@ -9,6 +9,7 @@ const port = process.env.PORT;
 const productsRouter = require("./routers/productsRouter");
 const categoriesRouter = require("./routers/categoriesRouter");
 const cartRouter = require("./routers/cartRouter");
+const wishlistRouter = require("./routers/wishlistRouter");
 const ordersRouter = require("./routers/ordersRouter");
 
 app.use(cors({ origin: process.env.FE_APP }));
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 app.use("/products", productsRouter);
 app.use("/categories", categoriesRouter);
 app.use("/cart", cartRouter);
+app.use("/wishlist", wishlistRouter);
 app.use("/orders", ordersRouter);
 
 // middleware di errore
