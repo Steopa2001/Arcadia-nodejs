@@ -1,18 +1,67 @@
 const connection = require("../data/db");
 
-// ----------------------- PRODUCTS INDEX ----------------------------------------
+// // ----------------------- PRODUCTS INDEX ----------------------------------------
+// const indexProducts = (req, res) => {
+//   const sql = "SELECT * FROM products";
+
+//   connection.query(sql, (err, result) => {
+//     if (err)
+//       return res
+//         .status(500)
+//         .json("Errore nella esecuzione della query: " + err);
+
+//     res.send(result);
+//   });
+// };
+
+// ----------------------- PRODUCTS INDEX (ricerca e ordinamento) ----------------------------------------
 const indexProducts = (req, res) => {
-  const sql = "SELECT * FROM products";
+  // prendo i parametri dalla query
+  const searchTerm = req.query.q ? req.query.q.toLowerCase() : "";
+  const categoryId = req.query.category_id;
+  let sortField = "name";   // di default ordino per nome
+  let sortOrder = "ASC";    // di default ordino crescente
 
-  connection.query(sql, (err, result) => {
-    if (err)
-      return res
-        .status(500)
-        .json("Errore nella esecuzione della query: " + err);
+  if (req.query.sort === "price") {
+    sortField = "price";
+  }
+  if (req.query.order === "desc") {
+    sortOrder = "DESC";
+  }
 
-    res.send(result);
+  // costruisco la query base
+  let sql = "SELECT * FROM products";
+  let values = [];
+
+  // se c'è la ricerca
+  if (searchTerm) {
+    sql += " WHERE LOWER(name) LIKE ?";
+    values.push(`%${searchTerm}%`);
+  }
+
+  // se c'è anche la categoria
+  if (categoryId) {
+    if (searchTerm) {
+      sql += " AND category_id = ?";
+    } else {
+      sql += " WHERE category_id = ?";
+    }
+    values.push(categoryId);
+  }
+
+  // aggiungo ordinamento
+  sql += " ORDER BY " + sortField + " " + sortOrder;
+
+  // eseguo query
+  connection.query(sql, values, (err, result) => {
+    if (err) {
+      res.status(500).json("Errore nella query: " + err);
+    } else {
+      res.json(result);
+    }
   });
 };
+
 
 // ----------------------- PRODUCTS BY CATEGORY ----------------------------------------
 const indexProductsByCategory = (req, res) => {
