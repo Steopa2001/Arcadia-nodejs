@@ -14,7 +14,6 @@ const connection = require("../data/db");
 //   });
 // };
 
-// ----------------------- PRODUCTS INDEX (ricerca e ordinamento) ----------------------------------------
 // ----------------------- PRODUCTS INDEX (ricerca, ordinamento, filtro per slug) -----------------------
 const indexProducts = (req, res) => {
   const searchTerm = req.query.q ? req.query.q.toLowerCase() : "";
