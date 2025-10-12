@@ -317,6 +317,9 @@ const addToCart = (req, res) => {
     if (existing.quantity + product.quantity <= 10) {
       existing.quantity = (existing.quantity || 1) + product.quantity;
     }
+    else {
+      return res.status(400).json({ error: "Quantità massima (10) raggiunta per questo prodotto" });
+    }
   }
   else {
     product.quantity = product.quantity || 1;
