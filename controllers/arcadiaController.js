@@ -312,19 +312,23 @@ const addToCart = (req, res) => {
   }
 
   // Se il prodotto è già nel carrello, aumenta la quantità
+  const incomingQuantity = product.quantity ? parseInt(product.quantity) : 1;
+
   const existing = cart.find((p) => p.id == product.id);
+
   if (existing) {
-    if (existing.quantity + product.quantity <= 10) {
-      existing.quantity = (existing.quantity || 1) + product.quantity;
+    if ((existing.quantity || 1) + incomingQuantity <= 10) {
+      existing.quantity = (existing.quantity || 1) + incomingQuantity;
+    } else {
+      return res.status(400).json({
+        error: "Quantità massima (10) raggiunta per questo prodotto",
+      });
     }
-    else {
-      return res.status(400).json({ error: "Quantità massima (10) raggiunta per questo prodotto" });
-    }
-  }
-  else {
-    product.quantity = product.quantity || 1;
+  } else {
+    product.quantity = incomingQuantity;
     cart.push(product);
   }
+
 
   res.status(201).json({ message: "Prodotto aggiunto al carrello", cart });
 };
