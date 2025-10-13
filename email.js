@@ -36,8 +36,20 @@ async function sendOrderEmails({ id, name, surname, email, total }) {
   const venditore = {
     from: process.env.MAIL_FROM,
     to: process.env.MAIL_TO_SELLER,
-    subject: `Nuovo ordine #${id}`,
-    text: `Ordine da ${name} ${surname}. Totale: €${total}.`,
+    subject: `🛒 Nuovo ordine #${id} ricevuto`,
+    html: `
+  <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+    <h2 style="color:#4B0082; margin-bottom: 10px;">Nuovo ordine ricevuto</h2>
+    <p style="margin: 5px 0;">Numero ordine: <strong>#${id}</strong></p>
+    <p style="margin: 5px 0;">Cliente: <strong>${name} ${surname}</strong></p>
+    <p style="margin: 5px 0;">Email: <a href="mailto:${email}" style="color:#4B0082;">${email}</a></p>
+    <p style="margin: 10px 0 20px 0;">Totale: <strong>€${total.toFixed(
+      2
+    )}</strong></p>
+
+    <hr style="border:none;border-top:1px solid #ddd;margin:20px 0;">
+  </div>
+  `,
   };
 
   await transporter.sendMail(cliente);
