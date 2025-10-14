@@ -9,7 +9,7 @@ const port = process.env.PORT;
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type"],
   })
 );
@@ -45,7 +45,7 @@ app.use("/cart", cartRouter);
 app.use("/wishlist", wishlistRouter);
 app.use("/orders", ordersRouter);
 
-// CHATBOT ARIA SUPREMA™
+//////////////////////////////////// CHATBOT ARIA SUPREMA™
 app.post("/api/chat", async (req, res) => {
   try {
     const { messages } = req.body;
