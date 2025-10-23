@@ -8,13 +8,31 @@ const app = express();
 // -----------------------------
 const port = process.env.PORT || 3000;
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-app.use(cors({
-  origin: FRONTEND_URL,
-  methods: ["GET","POST","PATCH","DELETE","PUT"],
-  allowedHeaders: ["Content-Type","Authorization"],
-  credentials: true
-}));
+// CORS: consenti sia locale che dominio Railway
+const allowed = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:5173'
+];
+
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin || allowed.includes(origin)) return cb(null, true);
+      return cb(new Error('Not allowed by CORS'));
+    },
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+  })
+);
+
+// const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+// app.use(cors({
+//   origin: FRONTEND_URL,
+//   methods: ["GET","POST","PATCH","DELETE","PUT"],
+//   allowedHeaders: ["Content-Type","Authorization"],
+//   credentials: true
+// }));
 
 // cors per fronted
 // app.use(
