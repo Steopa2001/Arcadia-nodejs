@@ -3,16 +3,27 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT;
+// const port = process.env.PORT;
+
+// -----------------------------
+const port = process.env.PORT || 3000;
+
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+app.use(cors({
+  origin: FRONTEND_URL,
+  methods: ["GET","POST","PATCH","DELETE","PUT"],
+  allowedHeaders: ["Content-Type","Authorization"],
+  credentials: true
+}));
 
 // cors per fronted
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
-    allowedHeaders: ["Content-Type"],
-  })
-);
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+//     allowedHeaders: ["Content-Type"],
+//   })
+// );
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -44,6 +55,11 @@ app.use("/categories", categoriesRouter);
 app.use("/cart", cartRouter);
 app.use("/wishlist", wishlistRouter);
 app.use("/orders", ordersRouter);
+
+// Health & base ---------------------
+app.get("/health", (_, res) => res.send("ok"));
+app.get("/", (_, res) => res.send("Rotta base"));
+
 
 //////////////////////////////////// CHATBOT ARIA SUPREMA™
 app.post("/api/chat", async (req, res) => {
@@ -187,8 +203,13 @@ app.use(errorsHandler);
 app.use(notFound);
 
 // avvio server
+// app.listen(port, () => {
+//   console.log(
+//     `🪄 Server in ascolto alla porta ${port} — Aria SUPREMA™ attiva ✨`
+//   );
+// });
+
+// -------------------
 app.listen(port, () => {
-  console.log(
-    `🪄 Server in ascolto alla porta ${port} — Aria SUPREMA™ attiva ✨`
-  );
+  console.log(`API su :${port}`);
 });
