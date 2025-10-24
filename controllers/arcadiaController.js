@@ -16,41 +16,41 @@ const connection = require("../data/db");
 
 // ----------------------- PRODUCTS INDEX (ricerca, ordinamento, filtro per slug) -----------------------
 const indexProducts = (req, res) => {
-  const searchTerm = req.query.q ? req.query.q.toLowerCase() : "";
-  const slug = req.query.slug; // lo slug della categoria (es. giochi-da-tavolo)
+  const searchTerm = (req.query.q || "").toLowerCase().trim();
+  const slug = (req.query.slug || "").trim();
 
-  let sortField = "name";
-  let sortOrder = "ASC";
-  if (req.query.sort === "price") sortField = "price";
-  if (req.query.order === "desc") sortOrder = "DESC";
+  // whitelist per sort
+  const sortField = req.query.sort === "price" ? "price" : "name";
+  const sortOrder = req.query.order === "desc" ? "DESC" : "ASC";
 
-  // query base
   let sql = "SELECT p.* FROM products p";
-  let values = [];
+  const values = [];
 
-  // se c’è slug, join con categories
   if (slug) {
-    sql += " JOIN categories c ON p.category_id = c.id WHERE c.slug = ?";
-    values.push(slug);
+    // Se il DB non ha c.slug, questa condizione prova anche su c.name
+    sql += " JOIN categories c ON p.category_id = c.id WHERE (c.slug = ? OR c.name = ?)";
+    values.push(slug, slug);
   } else {
-    sql += " WHERE 1=1"; // trucco per concatenare filtri
+    sql += " WHERE 1=1";
   }
 
-  // se c’è ricerca
   if (searchTerm) {
     sql += " AND LOWER(p.name) LIKE ?";
     values.push(`%${searchTerm}%`);
   }
 
-  // ordinamento
-  sql += " ORDER BY p." + sortField + " " + sortOrder;
+  sql += ` ORDER BY p.${sortField} ${sortOrder}`;
 
-  // eseguo query
-  connection.query(sql, values, (err, result) => {
+  console.log(" GET /products", { slug, searchTerm, sortField, sortOrder, sql, values });
+
+  connection.query(sql, values, (err, rows) => {
     if (err) {
-      return res.status(500).json({ error: "Errore query: " + err });
+      console.error(" GET /products errore DB:", err);
+      return res
+        .status(500)
+        .json({ error: "Errore nel recupero prodotti", code: err.code, msg: err.message });
     }
-    res.json(result);
+    return res.json(rows);
   });
 };
 
