@@ -15,42 +15,38 @@ const connection = require("../data/db");
 // };
 
 // ----------------------- PRODUCTS INDEX (ricerca, ordinamento, filtro per slug) -----------------------
+
 const indexProducts = (req, res) => {
-  const searchTerm = (req.query.q || "").toLowerCase().trim();
-  const slug = (req.query.slug || "").trim();
+  const searchTerm = (req.query.q || '').toLowerCase().trim();
+  const slug = (req.query.slug || '').trim();
+  const sortField = req.query.sort === 'price' ? 'price' : 'name';
+  const sortOrder = req.query.order === 'desc' ? 'DESC' : 'ASC';
 
-  // whitelist per sort
-  const sortField = req.query.sort === "price" ? "price" : "name";
-  const sortOrder = req.query.order === "desc" ? "DESC" : "ASC";
-
-  let sql = "SELECT p.* FROM products p";
+  let sql = 'SELECT p.* FROM products p';
   const values = [];
 
   if (slug) {
-    // Se il DB non ha c.slug, questa condizione prova anche su c.name
-    sql += " JOIN categories c ON p.category_id = c.id WHERE (c.slug = ? OR c.name = ?)";
+    sql += ' JOIN categories c ON p.category_id = c.id WHERE (c.slug = ? OR c.name = ?)';
     values.push(slug, slug);
   } else {
-    sql += " WHERE 1=1";
+    sql += ' WHERE 1=1';
   }
 
   if (searchTerm) {
-    sql += " AND LOWER(p.name) LIKE ?";
+    sql += ' AND LOWER(p.name) LIKE ?';
     values.push(`%${searchTerm}%`);
   }
 
   sql += ` ORDER BY p.${sortField} ${sortOrder}`;
 
-  console.log(" GET /products", { slug, searchTerm, sortField, sortOrder, sql, values });
+  console.log(' GET /products', { slug, searchTerm });
 
-  connection.query(sql, values, (err, rows) => {
+ connection.query(sql, values, (err, rows) => {
     if (err) {
-      console.error(" GET /products errore DB:", err);
-      return res
-        .status(500)
-        .json({ error: "Errore nel recupero prodotti", code: err.code, msg: err.message });
+      console.error(' GET /products errore DB:', err);
+      return res.status(500).json({ error: 'Errore DB', code: err.code, msg: err.message });
     }
-    return res.json(rows);
+    res.json(rows);
   });
 };
 
